@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="icon" href="game_15459691 (1).png">
+
+    <title>Meladi: Make music for you</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> <!-- Added FontAwesome -->
+
+    <style>
+
+        /* Global styles */
+
+        body {
+
+            background-color: #121212;
+
+            color: white;
+
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+            margin: 0;
+
+            padding: 0;
+
+        }
+
+
+
+        h1,
+
+        p {
+
+            text-align: center;
+
+        }
+
+
+
+        /* Search bar styles */
+
+        .search-bar {
+
+            text-align: center;
+
+            margin-top: 20px;
+
+        }
+
+
+
+        .search-bar input {
+
+            padding: 10px;
+
+            font-size: 16px;
+
+            border-radius: 50px;
+
+            border: 1px solid #888;
+
+            width: 50%;
+
+            max-width: 500px;
+
+            background-color: #1e1e1e;
+
+            color: #fff;
+
+        }
+
+
+
+        /* Sidebar styles */
+
+        .sidebar {
+
+            width: 220px;
+
+            padding: 20px;
+
+            background-color: #181818;
+
+            height: 100vh;
+
+            position: fixed;
+
+            top: 0;
+
+            left: 0;
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 20px;
+
+            color: white;
+
+        }
+
+
+
+        .sidebar h2 {
+
+            font-size: 24px;
+
+            font-weight: bold;
+
+            color: #1db954;
+
+            margin-bottom: 20px;
+
+        }
+
+
+
+        .sidebar a {
+
+            text-decoration: none;
+
+            color: white;
+
+            font-size: 18px;
+
+            transition: color 0.2s;
+
+        }
+
+
+
+        .sidebar a:hover {
+
+            color: #1db954;
+
+        }
+
+
+
+        .library-container {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            padding-top: 10px;
+
+            background-color: #2c3e50;
+
+            border-radius: 5px;
+
+        }
+
+
+
+        .library-container i {
+
+            color: #1db954;
+
+            font-size: 1.5rem;
+
+        }
+
+
+
+        /* Main content styling */
+
+        .main-content {
+
+            margin-left: 240px;
+
+            padding: 20px;
+
+            text-align: center;
+
+        }
+
+
+
+        /* Notification bar styles */
+
+        .notification {
+
+            position: fixed;
+
+            top: 0;
+
+            left: 0;
+
+            width: 100%;
+
+            padding: 10px;
+
+            text-align: center;
+
+            display: none;
+
+        }
+
+
+
+        .notification.success {
+
+            background-color: green;
+
+            color: white;
+
+        }
+
+
+
+        .notification.error {
+
+            background-color: red;
+
+            color: white;
+
+        }
+
+
+
+        /* Trending section */
+
+        .trending-container {
+
+            display: flex;
+
+            flex-wrap: wrap;
+
+            justify-content: space-evenly;
+
+            margin-top: 20px;
+
+        }
+
+
+
+        .trending-item {
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            background-color: #282828;
+
+            margin: 10px;
+
+            padding: 25px;
+
+            border-radius: 10px;
+
+            max-width: 350px;
+
+            text-align: center;
+
+            transition: transform 0.2s ease-in-out;
+
+        }
+
+
+
+        .trending-item img {
+
+            width: 150px;
+
+            height: 150px;
+
+            margin-bottom: 10px;
+
+            border-radius: 5px;
+
+        }
+
+
+
+        .trending-item h3 {
+
+            font-size: 1.5rem;
+
+            margin: 10px 0;
+
+        }
+
+
+
+        .trending-item button {
+
+            padding: 10px 20px;
+
+            background-color: #1db954;
+
+            color: white;
+
+            border: none;
+
+            cursor: pointer;
+
+            border-radius: 50px;
+
+            font-size: 14px;
+
+            transition: background-color 0.3s ease;
+
+        }
+
+
+
+        .trending-item button:hover {
+
+            background-color: #1ed760;
+
+        }
+
+
+
+        /* Song List Container */
+
+        .song-list-container {
+
+            display: flex;
+
+            flex-wrap: wrap;
+
+            justify-content: space-evenly;
+
+            gap: 20px;
+
+            margin-top: 20px;
+
+        }
+
+
+
+        /* Song Item styles */
+
+        .song-item,
+
+        .recommended-item {
+
+            background-color: #282828;
+
+            padding: 20px;
+
+            border-radius: 10px;
+
+            max-width: 250px;
+
+            text-align: center;
+
+            transition: transform 0.2s ease-in-out;
+
+            width: 100%;
+
+        }
+
+
+
+        .song-item img,
+
+        .recommended-item img {
+
+            width: 100%;
+
+            max-width: 150px;
+
+            height: 150px;
+
+            border-radius: 10px;
+
+            margin-bottom: 10px;
+
+        }
+
+
+
+        .song-item h3,
+
+        .recommended-item h3 {
+
+            font-size: 1.2rem;
+
+            margin: 10px 0;
+
+        }
+
+
+
+        .song-item p,
+
+        .recommended-item p {
+
+            font-size: 1rem;
+
+            color: #aaa;
+
+        }
+
+
+
+        .song-item button,
+
+        .recommended-item button {
+
+            padding: 10px 20px;
+
+            background-color: #1db954;
+
+            color: white;
+
+            border: none;
+
+            cursor: pointer;
+
+            border-radius: 50px;
+
+            transition: background-color 0.3s;
+
+        }
+
+
+
+        .song-item button:hover,
+
+        .recommended-item button:hover {
+
+            background-color: #1ed760;
+
+        }
+
+
+
+        /* Hover effect for song items */
+
+        .song-item:hover,
+
+        .recommended-item:hover {
+
+            transform: scale(1.05);
+
+        }
+
+
+
+        /* Recommended Song Styling */
+
+        .recommended-item {
+
+            background-color: #212121;
+
+            border: 2px solid #1db954;
+
+        }
+
+
+
+        .recommended-item h3 {
+
+            font-size: 1.3rem;
+
+            font-weight: bold;
+
+            color: #1db954;
+
+        }
+
+
+
+        /* Footer */
+
+        footer {
+
+            text-align: center;
+
+            margin-top: 30px;
+
+            color: #aaa;
+
+            padding: 20px;
+
+        }
+
+
+
+        /* Artist row */
+
+        .artist-row {
+
+            display: flex;
+
+            justify-content: center;
+
+            gap: 30px;
+
+            margin-top: 20px;
+
+        }
+
+
+
+        .artist-item {
+
+            background-color: #282828;
+
+            padding: 15px;
+
+            border-radius: 10px;
+
+            text-align: center;
+
+            width: 150px;
+
+            position: relative;
+
+        }
+
+
+
+        .artist-item img {
+
+            width: 100%;
+
+            height: 150px;
+
+            border-radius: 10px;
+
+            margin-bottom: 10px;
+
+        }
+
+
+
+        .artist-item h3 {
+
+            font-size: 1rem;
+
+            color: #1db954;
+
+        }
+
+
+
+        /* Loading Spinner */
+
+        .loading-spinner {
+
+            display: none;
+
+            text-align: center;
+
+            color: #1db954;
+
+            font-size: 1.5rem;
+
+            padding: 20px;
+
+        }
+
+
+
+        .genre-container {
+
+            display: flex;
+
+            justify-content: space-evenly;
+
+            flex-wrap: wrap;
+
+            margin-top: 20px;
+
+            display: none; /* Initially hidden */
+
+        }
+
+
+
+        .genre-item {
+
+            background-color: #282828;
+
+            padding: 15px;
+
+            text-align: center;
+
+            border-radius: 10px;
+
+            width: 150px;
+
+            margin: 10px;
+
+        }
+
+
+
+        .genre-item img {
+
+            width: 100%;
+
+            height: 100px;
+
+            margin-bottom: 10px;
+
+            border-radius: 10px;
+
+        }
+
+
+
+        .genre-item h3 {
+
+            font-size: 1rem;
+
+            color: #1db954;
+
+        }
+
+        
+
+        /* Playlist section */
+
+        .playlist-container {
+
+            margin-top: 20px;
+
+            text-align: center;
+
+        }
+
+        
+
+        .create-playlist-button {
+
+            padding: 10px 20px;
+
+            background-color: #1db954;
+
+            color: white;
+
+            border: none;
+
+            cursor: pointer;
+
+            border-radius: 50px;
+
+            font-size: 14px;
+
+            margin-bottom: 20px;
+
+            transition: background-color 0.3s ease;
+
+        }
+
+        
+
+        .create-playlist-button:hover {
+
+            background-color: #1ed760;
+
+        }
+
+        
+
+        .playlist-item {
+
+            background-color: #282828;
+
+            padding: 15px;
+
+            margin-top: 10px;
+
+            border-radius: 10px;
+
+            text-align: center;
+        }
+        .playlist-item h4 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: white;
+        }
+        .playlist-item button {
+            padding: 8px 16px;
+            background-color: #1db954;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .playlist-item button:hover {
+            background-color: #1ed760;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <h2>Meladi</h2>
+        <a href="about.html">Home</a>
+        <a href="new.html">Trending</a>
+    <a href="composed by user.html">Composed by Users</a>
+        <a href="#">Anime</a>
+        <a href="#">Famous Songs</a>
+        <!-- New 'Your library' section with a library icon -->
+        <div class="library-container">
+
+            <i class="fa fa-book"></i>
+            <h3>Your Library</h3>
+            <div class="playlist-container">
+                <button class="create-playlist-button" onclick="createPlaylist()">Create Playlist</button>
+                <div id="playlistList"></div>
+            </div>
+        </div
+        <!-- Language Selection Section -->
+        <div class="language-container">
+            <label for="languageSelect">Select Language:</label>
+            <select id="languageSelect" onchange="changeLanguage(event)">
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="it">Italian</option>
+                <option value="pt">Portuguese</option>
+            </select>
+        </div>
+        <style>
+             /* New Language section */
+        .language-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .language-container select {
+            background-color: #1e1e1e;
+            color: white;
+            border: 1px solid #888;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            width: 100%;
+        }
+        </style>
+    </div
+    <!-- Notification Bar -->
+    <div class="notification" id="notification"></div
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="search-bar">
+            <h1>Meladi</h1>
+            <p>Make music for you</p>
+            <input type="text" id="searchInput" placeholder="Search for songs..." oninput="suggestSongs()">
+        </div
+        <!-- Loading Spinner -->
+        <div class="loading-spinner" id="loadingSpinner">
+            <span>Loading...</span>
+        </div>
+ <!-- Top Artists Section -->
+<div class="artist-container">
+    <h2>Top Artists</h2>
+    <div class="artist-row" id="artistsRow">
+        <!-- Example of an artist card -->
+        <div class="artist-card">
+            <img src="download.webp" alt="Black Sherif">
+            <h3>Black Sherif</h3>
+            <button onclick="viewArtistProfile('Black Sherif')">View Profile</button>
+        </div>
+        <div class="artist-card">
+            <img src="download (1).webp" alt="Sarkodie">
+            <h3>Sarkodie</h3>
+            <button onclick="viewArtistProfile('Sarkodie')">View Profile</button>
+        </div>
+        <div class="artist-card">
+            <img src="download (2).webp" alt="King Promise">
+            <h3>King Promise</h3>
+            <button onclick="viewArtistProfile('King Promise')">View Profile</button>
+        </div>
+        <div class="artist-card">
+            <img src="download (3).webp" alt="Davido">
+            <h3>Davido</h3>
+            <button onclick="viewArtistProfile('Davido')">View Profile</button>
+        </div>
+        <!-- More artist cards as needed -->
+    </div>
+</div>
+<style>
+    .artist-container {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .artist-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 20px;
+        justify-content: center;
+        padding: 0 20px;
+    }
+
+    .artist-card {
+        background-color: #282828;
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .artist-card img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+
+    .artist-card h3 {
+        font-size: 1.2rem;
+        color: #1db954;
+        margin: 10px 0;
+    }
+
+    .artist-card button {
+        padding: 8px 16px;
+        background-color: #1db954;
+        color: white;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+    }
+
+    .artist-card button:hover {
+        background-color: #1ed760;
+    }
+
+    .artist-card:hover {
+        transform: scale(1.05);
+    }
+</style>
+<script>
+    // Mock function to simulate viewing artist profiles
+    function viewArtistProfile(artistName) {
+        alert(`Viewing profile of ${artistName}`);
+    }
+</script>
+        <!-- Suggested Song List -->
+        <div class="song-list-container" id="songsList"></div>
+        <!-- Recommended Songs Section -->
+        <h2>Recommended Songs for You</h2>
+        <div class="song-list-container" id="recommendedSongsList"></div>
+        <!-- Trending Songs Section -->
+        <h2>Trending Songs</h2>
+        <div class="trending-container" id="trendingList"></div>
+        <!-- Music Genres Section -->
+        <h2>Music Genres</h2>
+        <div class="genre-container" id="genreList"></div>
+    </div>
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Meladi. All Rights Reserved.</p>
+    </footer>
+    <script>
+        // Function to create a new playlist
+        function createPlaylist() {
+            const playlistName = prompt('Enter the name of your new playlist:');
+            if (playlistName) {
+                const playlistList = document.getElementById('playlistList');
+                const newPlaylist = document.createElement('div');
+                newPlaylist.className = 'playlist-item';
+                newPlaylist.innerHTML = `
+                    <h4>${playlistName}</h4>
+                    <button onclick="viewPlaylist('${playlistName}')">View Playlist</button>
+                `;
+                playlistList.appendChild(newPlaylist);
+            }
+        }
+        // Mock function to handle viewing a playlist
+        function viewPlaylist(playlistName) {
+            alert(`Viewing playlist: ${playlistName}`);
+        }
+        // Function to show the notification
+        function showNotification(message, success = true) {
+            const notification = document.getElementById('notification');
+            notification.classList.remove('success', 'error');
+            notification.classList.add(success ? 'success' : 'error');
+            notification.innerHTML = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+        // Improved search with delay
+        let typingTimer;
+        const typingInterval = 500; // Delay in ms (500ms delay after the last key press)
+        function suggestSongs() {
+            const searchQuery = document.getElementById('searchInput').value;
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const suggestonsContainer = document.getElementById('songsList');
+            const recommendedContainer = document.getElementById('recommendedSongsList');
+            const genreContainer = document.getElementById('genreList'); // Access the genre container
+            // Show genres if search query is empty
+            if (!searchQuery) {
+                genreContainer.style.display = 'flex'; // Show genres container
+                suggestionsContainer.innerHTML = '';  // Clear song suggestions
+                recommendedContainer.innerHTML = ''; // Clear recommended songs
+                return; // Stop further code execution
+            }
+            // Hide the genre container when a search query exists
+            genreContainer.style.display = 'none';
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+                if (!searchQuery) return;
+                loadingSpinner.style.display = 'block';
+                const apiUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(searchQuery)}&entity=song&limit=10`;
+                fetch(apiUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        suggestionsContainer.innerHTML = '';
+                        recommendedContainer.innerHTML = '';
+                        loadingSpinner.style.display = 'none';
+                        if (data.results.length > 0) {
+                            showNotification('Search Successful', true);
+                            data.results.forEach(song => {
+                                const songItem = document.createElement('div');
+                                songItem.className = 'song-item';
+                                songItem.innerHTML = `
+                                    <img src="${song.artworkUrl100}" alt="${song.trackName}">
+                                    <h3>${song.trackName}</h3>
+                                    <p>${song.artistName}</p>
+                                    <button onclick="window.location.href='${song.collectionViewUrl}'">Listen</button>
+                                `;
+                                suggestionsContainer.appendChild(songItem);
+                            });
+                        } else {
+                            showNotification('No songs found. Please check your search query.', false);
+                        }
+                    })
+                    .catch(() => {
+                        showNotification('Error: Could not fetch data.', false);
+                        loadingSpinner.style.display = 'none';
+                    });
+            }, typingInterval);
+        }
+        // Mock genre data (replace with real data if available)
+        const genres = ['Rock', 'Pop', 'Jazz', 'Classical', 'Hip-Hop', 'Electronic', 'Country', 'Reggae', 'Blues'];
+        const genreList = document.getElementById('genreList');
+        genres.forEach(genre => {
+            const genreItem = document.createElement('div');
+            genreItem.className = 'genre-item';
+            genreItem.innerHTML = `
+                <img src="https://via.placeholder.com/150" alt="${genre}">
+                <h3>${genre}</h3>
+            `;
+            genreList.appendChild(genreItem);
+        });
+    </script>
+</body>
+</html>
+
