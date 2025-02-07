@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recent Searches - Meladi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .recent-searches-container {
+            padding: 20px;
+            background: #181818;
+            border-radius: 8px;
+            margin: 20px;
+            color: white;
+        }
+
+        .recent-searches-chart {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .recent-searches-chart h2 {
+            color: #ff9800;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .chart-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .chart-item {
+            position: relative;
+            padding: 15px;
+            background: #202020;
+            border-radius: 8px;
+            transition: transform 0.2s ease;
+        }
+
+        .chart-item:hover {
+            transform: translateX(10px);
+            background: #2a2a2a;
+        }
+
+        .song-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 2;
+            position: relative;
+        }
+
+        .song-info img {
+            width: 50px;
+            height: 50px;
+            border-radius: 4px;
+            object-fit: cover;
+        }
+
+        .song-details {
+            flex: 1;
+        }
+
+        .song-title {
+            display: block;
+            color: #fff;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .song-artist {
+            display: block;
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        .search-count {
+            color: #ff9800;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .chart-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: var(--percentage);
+            background: rgba(255, 152, 0, 0.1);
+            border-radius: 8px;
+            z-index: 1;
+        }
+
+        .no-searches {
+            color: #999;
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+        }
+
+        .last-searched {
+            color: #666;
+            font-size: 0.8em;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="recent-searches-container" id="recentSearchesContainer">
+        <div class="recent-searches-chart">
+            <h2>Recent Searches</h2>
+            <div id="chartContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Function to handle searches
+        function addSearch(songTitle, artistName, imageUrl) {
+            let searches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+            const now = new Date().toISOString();
+            
+            // Check if song already exists
+            const existingIndex = searches.findIndex(s => 
+                s.title.toLowerCase() === songTitle.toLowerCase() && 
+                s.artist.toLowerCase() === artistName.toLowerCase()
+            );
+
+            if (existingIndex !== -1) {
+                // Update existing song
+                searches[existingIndex].searchCount++;
+                searches[existingIndex].lastSearched = now;
+            } else {
+                // Add new song
+                searches.push({
+                    title: songTitle,
+                    artist: artistName,
+                    imageUrl: imageUrl,
+                    searchCount: 1,
+                    lastSearched: now
+                });
+            }
+
+            // Keep only top 10 most searched songs
+            searches.sort((a, b) => b.searchCount - a.searchCount);
+            searches = searches.slice(0, 10);
+
+            localStorage.setItem('recentSearches', JSON.stringify(searches));
+            displaySearches();
+        }
+
+        // Function to display searches
+        function displaySearches() {
+            const chartContent = document.getElementById('chartContent');
+            const searches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+
+            if (searches.length === 0) {
+                chartContent.innerHTML = '<p class="no-searches">No recent searches yet</p>';
+                return;
+            }
+
+            // Sort by search count
+            searches.sort((a, b) => b.searchCount - a.searchCount);
+            const maxCount = Math.max(...searches.map(s => s.searchCount));
+
+            // Generate HTML for each song
+            chartContent.innerHTML = searches.map(song => {
+                const percentage = (song.searchCount / maxCount) * 100;
+                const lastSearched = new Date(song.lastSearched);
+                const timeAgo = getTimeAgo(lastSearched);
+
+                return `
+                    <div class="chart-item" style="--percentage: ${percentage}%">
+                        <div class="song-info">
+                            <img src="${song.imageUrl}" alt="${song.title}" 
+                                 onerror="this.src='https://via.placeholder.com/50?text=No+Image'">
+                            <div class="song-details">
+                                <span class="song-title">${song.title}</span>
+                                <span class="song-artist">${song.artist}</span>
+                                <span class="last-searched">Last searched ${timeAgo}</span>
+                            </div>
+                            <div class="search-count">
+                                ${song.searchCount} ${song.searchCount === 1 ? 'search' : 'searches'}
+                            </div>
+                        </div>
+                        <div class="chart-bar"></div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Helper function to format time ago
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            const intervals = {
+                year: 31536000,
+                month: 2592000,
+                week: 604800,
+                day: 86400,
+                hour: 3600,
+                minute: 60
+            };
+
+            for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+                const interval = Math.floor(seconds / secondsInUnit);
+                if (interval >= 1) {
+                    return `${interval} ${unit}${interval === 1 ? '' : 's'} ago`;
+                }
+            }
+            return 'just now';
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', displaySearches);
+
+        // Example usage (you can remove this in production)
+        // addSearch('Song Title', 'Artist Name', 'path/to/image.jpg');
+    </script>
+</body>
+</html> 

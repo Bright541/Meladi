@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customize Profile - Meladi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #0d0d0d, #1c1c1c);
+            color: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .customize-card {
+            background: #202020;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #ff9800;
+            margin-bottom: 30px;
+        }
+
+        .profile-section {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .profile-preview {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            overflow: hidden;
+            position: relative;
+            background: var(--profile-bg, linear-gradient(45deg, #ff9800, #ff5722));
+        }
+
+        .profile-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .upload-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .profile-preview:hover .upload-overlay {
+            opacity: 1;
+        }
+
+        .theme-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .theme-option {
+            height: 60px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .theme-option:hover {
+            transform: scale(1.05);
+        }
+
+        .theme-option.selected {
+            border: 2px solid #ff9800;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .save-btn {
+            background: linear-gradient(to right, #ff9800, #ff5722);
+            color: white;
+        }
+
+        .save-btn:hover {
+            background: linear-gradient(to left, #ff5722, #ff9800);
+            box-shadow: 0 0 12px #ff9800;
+        }
+
+        .cancel-btn {
+            background: #333;
+            color: #fff;
+        }
+
+        .cancel-btn:hover {
+            background: #444;
+        }
+
+        #profileFileInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="customize-card">
+            <h1>Customize Your Profile</h1>
+            
+            <div class="profile-section">
+                <div class="profile-preview" id="profilePreview">
+                    <!-- Will be filled by JS -->
+                    <div class="upload-overlay" onclick="document.getElementById('profileFileInput').click()">
+                        <i class="fas fa-camera"></i> Change Picture
+                    </div>
+                </div>
+                <input type="file" id="profileFileInput" accept="image/*">
+            </div>
+
+            <h3>Choose Theme Color</h3>
+            <div class="theme-options">
+                <div class="theme-option" data-theme="sunset" style="background: linear-gradient(45deg, #ff9800, #ff5722)"></div>
+                <div class="theme-option" data-theme="ocean" style="background: linear-gradient(45deg, #4285f4, #34a853)"></div>
+                <div class="theme-option" data-theme="fire" style="background: linear-gradient(45deg, #ea4335, #fbbc05)"></div>
+                <div class="theme-option" data-theme="twilight" style="background: linear-gradient(45deg, #7c4dff, #448aff)"></div>
+                <div class="theme-option" data-theme="forest" style="background: linear-gradient(45deg, #11998e, #38ef7d)"></div>
+                <div class="theme-option" data-theme="mystic" style="background: linear-gradient(45deg, #834d9b, #d04ed6)"></div>
+            </div>
+
+            <div class="buttons">
+                <button class="save-btn" onclick="saveChanges()">Save Changes</button>
+                <button class="cancel-btn" onclick="window.location.href='true meladi.html'">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const imageData = e.target.result;
+                
+                // Save image immediately to preview
+                const profilePreview = document.getElementById('profilePreview');
+                profilePreview.innerHTML = `
+                    <img src="${imageData}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                `;
+                
+                // Store image data for saving later
+                localStorage.setItem('tempProfileImage', imageData);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleThemeChange(selectedOption) {
+            document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('selected'));
+            selectedOption.classList.add('selected');
+            
+            // If no profile picture, update the preview background
+            const profilePreview = document.getElementById('profilePreview');
+            const hasProfilePicture = profilePreview.querySelector('img');
+            
+            if (!hasProfilePicture) {
+                const background = getComputedStyle(selectedOption).background;
+                profilePreview.style.background = background;
+                localStorage.setItem('userProfileBackground', background);
+            }
+        }
+
+        function saveChanges() {
+            const userData = JSON.parse(localStorage.getItem('currentUser'));
+            const imageData = localStorage.getItem('tempProfileImage');
+
+            if (imageData) {
+                // Save the image to user data
+                userData.profilePicture = imageData;
+                localStorage.setItem('currentUser', JSON.stringify(userData));
+
+                // Update in users array for persistence
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                const userIndex = users.findIndex(u => u.email === userData.email);
+                if (userIndex !== -1) {
+                    users[userIndex].profilePicture = imageData;
+                    localStorage.setItem('users', JSON.stringify(users));
+                }
+            }
+
+            // Clear temporary storage
+            localStorage.removeItem('tempProfileImage');
+
+            // Return to main page
+            window.location.href = 'true meladi.html';
+        }
+
+        // Initialize profile preview
+        document.addEventListener('DOMContentLoaded', function() {
+            const userData = JSON.parse(localStorage.getItem('currentUser'));
+            if (!userData) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const profilePreview = document.getElementById('profilePreview');
+            const savedImage = localStorage.getItem('userProfileImage') || userData.profilePicture;
+
+            if (savedImage) {
+                // Show uploaded or existing profile picture
+                profilePreview.style.background = 'none';
+                profilePreview.innerHTML = `
+                    <img src="${savedImage}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+                    <div class="upload-overlay" onclick="document.getElementById('profileFileInput').click()">
+                        <i class="fas fa-camera"></i> Change Picture
+                    </div>
+                `;
+            } else {
+                // Show initial with background color if no image
+                const background = userData.backgroundColor || getComputedStyle(document.querySelector('.theme-option')).background;
+                profilePreview.style.background = background;
+                profilePreview.innerHTML = `
+                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 72px; color: white;">
+                        ${userData.username.charAt(0).toUpperCase()}
+                    </div>
+                    <div class="upload-overlay" onclick="document.getElementById('profileFileInput').click()">
+                        <i class="fas fa-camera"></i> Change Picture
+                    </div>
+                `;
+            }
+
+            // Set up file input
+            const fileInput = document.getElementById('profileFileInput');
+            fileInput.addEventListener('change', handleFileUpload);
+
+            // Initialize theme selection
+            const themeOptions = document.querySelectorAll('.theme-option');
+            themeOptions.forEach(option => {
+                if (option.dataset.theme === userData.theme) {
+                    option.classList.add('selected');
+                }
+                option.addEventListener('click', () => handleThemeChange(option));
+            });
+        });
+    </script>
+</body>
+</html> 

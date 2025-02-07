@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="game_15459691 (1).png"> <title>Log In - Meladi</title>
+    <meta name="google-signin-scope" content="profile email">
+    <meta name="google-signin-client_id" content="YOUR_ACTUAL_CLIENT_ID.apps.googleusercontent.com">
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #0d0d0d, #1c1c1c);
+            color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            background: #202020;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ff9800;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ccc;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: #333;
+            color: #f5f5f5;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #ff9800;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(to right, #ff9800, #ff5722);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(to left, #ff5722, #ff9800);
+            box-shadow: 0 0 12px #ff9800;
+        }
+
+        .links {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .links a {
+            color: #ff9800;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: #ff4444;
+            font-size: 12px;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .password-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            padding: 0;
+            font-size: 16px;
+        }
+
+        .password-toggle:hover {
+            color: #ff9800;
+        }
+
+        .password-container input[type="password"],
+        .password-container input[type="text"] {
+            padding-right: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Log In to Meladi</h1>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
+                <span id="emailError" class="error-message"></span>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="password-container">
+                    <input type="password" id="password" required>
+                    <button type="button" class="password-toggle" onclick="togglePasswordVisibility('password')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <span id="passwordError" class="error-message"></span>
+            </div>
+            <button type="submit">Log In</button>
+        </form>
+        <div class="links">
+            <a href="signin.html">New user? Sign In</a>
+            <a href="true meladi.html">Back to Home</a>
+        </div>
+        <div class="oauth-container">
+            <div class="g-signin2" data-onsuccess="onGoogleSignIn" data-theme="dark" data-longtitle="true"></div>
+        </div>
+    </div>
+
+    <script>
+        let loginAttempts = 0;
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Clear previous error messages
+            document.querySelectorAll('.error-message').forEach(elem => elem.textContent = '');
+            
+            // Get existing users
+            const existingUsers = JSON.parse(localStorage.getItem('users')) || [];
+            
+            // Find user with matching email
+            const user = existingUsers.find(u => u.email === email);
+            
+            if (!user) {
+                document.getElementById('emailError').textContent = 'No account found with this email';
+                return;
+            }
+
+            if (user.password !== password) {
+                loginAttempts++;
+                document.getElementById('passwordError').textContent = `Incorrect password. Attempts remaining: ${3 - loginAttempts}`;
+                
+                if (loginAttempts >= 3) {
+                    // Redirect to forgot password page
+                    window.location.href = 'forgot-password.html?email=' + encodeURIComponent(email);
+                    return;
+                }
+                return;
+            }
+            
+            // Reset login attempts on successful login
+            loginAttempts = 0;
+            
+            // Update online status
+            user.online = true;
+            localStorage.setItem('users', JSON.stringify(existingUsers));
+            
+            // Save current user
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            
+            // Redirect to main page with correct path
+            window.location.href = 'true meladi.html';
+        });
+
+        function getRandomColor() {
+            const colors = ['#4285f4', '#34a853', '#fbbc05', '#ea4335', '#ff6d01', '#46bdc6'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function togglePasswordVisibility(inputId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleButton = passwordInput.nextElementSibling;
+            const icon = toggleButton.querySelector('i');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        function handleGoogleError(error) {
+            console.error('Google Sign-In Error:', error);
+            // Display user-friendly error message
+            const errorMessage = document.createElement('div');
+            errorMessage.className = 'error-message';
+            errorMessage.textContent = 'Failed to sign in with Google. Please try again.';
+            document.querySelector('.oauth-container').appendChild(errorMessage);
+        }
+
+        function onGoogleSignIn(googleUser) {
+            try {
+                const profile = googleUser.getBasicProfile();
+                const id_token = googleUser.getAuthResponse().id_token;
+                
+                // Create user object from Google profile
+                const user = {
+                    username: profile.getName(),
+                    email: profile.getEmail(),
+                    profilePicture: profile.getImageUrl(),
+                    googleId: profile.getId(),
+                    backgroundColor: getRandomColor(),
+                    online: true,
+                    isGoogleUser: true
+                };
+                
+                // Get existing users
+                const existingUsers = JSON.parse(localStorage.getItem('users')) || [];
+                
+                // Check if user already exists
+                const existingUser = existingUsers.find(u => u.email === user.email);
+                
+                if (!existingUser) {
+                    // Add new user
+                    existingUsers.push(user);
+                    localStorage.setItem('users', JSON.stringify(existingUsers));
+                } else {
+                    // Update existing user
+                    Object.assign(existingUser, user);
+                    localStorage.setItem('users', JSON.stringify(existingUsers));
+                }
+                
+                // Set current user
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                
+                // Redirect to main page with correct path
+                window.location.href = 'true meladi.html';
+            } catch (error) {
+                handleGoogleError(error);
+            }
+        }
+
+        function refreshToken() {
+            const auth2 = gapi.auth2.getAuthInstance();
+            if (auth2.isSignedIn.get()) {
+                auth2.currentUser.get().reloadAuthResponse().then(
+                    response => {
+                        // Update token in localStorage
+                        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+                        if (currentUser) {
+                            currentUser.token = response.id_token;
+                            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                        }
+                    },
+                    error => console.error('Token refresh failed:', error)
+                );
+            }
+        }
+
+        // Refresh token every 45 minutes
+        setInterval(refreshToken, 45 * 60 * 1000);
+    </script>
+</body>
+</html> 

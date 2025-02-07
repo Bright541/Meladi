@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="game_15459691 (1).png">
+    <title>Browse Music - Meladi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #0d0d0d, #1c1c1c);
+            color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .category-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .category-card i {
+            font-size: 40px;
+            color: #ff9800;
+            margin-bottom: 15px;
+        }
+
+        .category-card h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #fff;
+        }
+
+        .songs-container {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .songs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .song-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .song-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .song-card img {
+            width: 150px;
+            height: 150px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .song-card h4 {
+            margin: 5px 0;
+            font-size: 16px;
+            color: #fff;
+        }
+
+        .song-card p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #b3b3b3;
+        }
+
+        .play-button {
+            background: #1db954;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .play-button:hover {
+            background: #1ed760;
+            transform: scale(1.05);
+        }
+
+        .play-button.disabled {
+            background: #404040;
+            cursor: not-allowed;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            color: #ff9800;
+            font-size: 24px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: translateX(-5px);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #b3b3b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-button" onclick="window.location.href='true-meladi.html'">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        
+        <div id="categoriesGrid" class="categories-grid">
+            <!-- Categories will be populated here -->
+        </div>
+
+        <div id="songsContainer" class="songs-container">
+            <button class="back-button" onclick="showCategories()">
+                <i class="fas fa-arrow-left"></i> Back to Categories
+            </button>
+            <h2 id="categoryTitle"></h2>
+            <div id="songsGrid" class="songs-grid">
+                <!-- Songs will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const categories = [
+            { id: 'pop', name: 'Pop', icon: 'fa-music', term: 'pop' },
+            { id: 'rock', name: 'Rock', icon: 'fa-guitar', term: 'rock' },
+            { id: 'hiphop', name: 'Hip Hop', icon: 'fa-compact-disc', term: 'hip-hop' },
+            { id: 'jazz', name: 'Jazz', icon: 'fa-saxophone', term: 'jazz' },
+            { id: 'classical', name: 'Classical', icon: 'fa-violin', term: 'classical' },
+            { id: 'electronic', name: 'Electronic', icon: 'fa-wave-square', term: 'electronic' },
+            { id: 'rnb', name: 'R&B', icon: 'fa-record-vinyl', term: 'r&b' },
+            { id: 'country', name: 'Country', icon: 'fa-hat-cowboy', term: 'country' },
+            { id: 'latin', name: 'Latin', icon: 'fa-guitar', term: 'latin' },
+            { id: 'indie', name: 'Indie', icon: 'fa-headphones', term: 'indie' },
+            { id: 'metal', name: 'Metal', icon: 'fa-drum', term: 'metal' },
+            { id: 'blues', name: 'Blues', icon: 'fa-guitar-electric', term: 'blues' }
+        ];
+
+        // Populate categories
+        function displayCategories() {
+            const grid = document.getElementById('categoriesGrid');
+            grid.innerHTML = categories.map(category => `
+                <div class="category-card" onclick="loadSongs('${category.term}', '${category.name}')">
+                    <i class="fas ${category.icon}"></i>
+                    <h3>${category.name}</h3>
+                </div>
+            `).join('');
+        }
+
+        // Load songs for a category
+        async function loadSongs(term, categoryName) {
+            const songsContainer = document.getElementById('songsContainer');
+            const songsGrid = document.getElementById('songsGrid');
+            const categoryTitle = document.getElementById('categoryTitle');
+
+            // Show loading state
+            songsGrid.innerHTML = '<div class="loading">Loading songs...</div>';
+            categoryTitle.textContent = categoryName;
+            songsContainer.style.display = 'block';
+            document.getElementById('categoriesGrid').style.display = 'none';
+
+            try {
+                const response = await fetch(`https://itunes.apple.com/search?term=${term}&entity=song&limit=20`);
+                const data = await response.json();
+
+                if (data.results.length === 0) {
+                    songsGrid.innerHTML = '<div class="loading">No songs found</div>';
+                    return;
+                }
+
+                songsGrid.innerHTML = data.results.map(song => `
+                    <div class="song-card">
+                        <img src="${song.artworkUrl100.replace('100x100', '300x300')}" 
+                             alt="${song.trackName}"
+                             onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
+                        <h4>${song.trackName}</h4>
+                        <p>${song.artistName}</p>
+                        ${song.previewUrl ? `
+                            <button class="play-button" onclick="playSongPreview('${song.previewUrl}', this)">
+                                <i class="fas fa-play"></i> Play Preview
+                            </button>
+                        ` : `
+                            <button class="play-button disabled">
+                                <i class="fas fa-ban"></i> No Preview
+                            </button>
+                        `}
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Error loading songs:', error);
+                songsGrid.innerHTML = '<div class="loading">Error loading songs. Please try again.</div>';
+            }
+        }
+
+        // Show categories
+        function showCategories() {
+            document.getElementById('songsContainer').style.display = 'none';
+            document.getElementById('categoriesGrid').style.display = 'grid';
+        }
+
+        // Audio player management
+        let currentAudio = null;
+        let currentPlayButton = null;
+
+        function playSongPreview(previewUrl, buttonElement) {
+            if (currentAudio && currentAudio.src === previewUrl) {
+                if (currentAudio.paused) {
+                    currentAudio.play();
+                    buttonElement.innerHTML = '<i class="fas fa-pause"></i> Pause';
+                } else {
+                    currentAudio.pause();
+                    buttonElement.innerHTML = '<i class="fas fa-play"></i> Play Preview';
+                }
+                return;
+            }
+
+            if (currentAudio) {
+                currentAudio.pause();
+                if (currentPlayButton) {
+                    currentPlayButton.innerHTML = '<i class="fas fa-play"></i> Play Preview';
+                }
+            }
+
+            currentAudio = new Audio(previewUrl);
+            currentPlayButton = buttonElement;
+
+            currentAudio.play();
+            buttonElement.innerHTML = '<i class="fas fa-pause"></i> Pause';
+
+            currentAudio.onended = () => {
+                buttonElement.innerHTML = '<i class="fas fa-play"></i> Play Preview';
+            };
+        }
+
+        // Initialize categories on page load
+        document.addEventListener('DOMContentLoaded', displayCategories);
+    </script>
+</body>
+</html> 

@@ -1,0 +1,84 @@
+<!-- Update the user profile click handler -->
+<script>
+document.getElementById('userProfileContainer').addEventListener('click', function() {
+    window.location.href = 'profile.html';
+});
+
+// Add this to your existing script to track achievements
+function checkAndAwardAchievements() {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser) return;
+
+    if (!currentUser.achievements) {
+        currentUser.achievements = [];
+    }
+
+    // Check for Welcome achievement
+    if (!currentUser.achievements.includes('welcome')) {
+        currentUser.achievements.push('welcome');
+    }
+
+    // Check for Music Lover achievement
+    if (currentUser.listenedSongs && currentUser.listenedSongs.length >= 10 
+        && !currentUser.achievements.includes('musicLover')) {
+        currentUser.achievements.push('musicLover');
+    }
+
+    // Check for Playlist Master achievement
+    const playlists = JSON.parse(localStorage.getItem('playlists')) || [];
+    if (playlists.length >= 3 && !currentUser.achievements.includes('playlistMaster')) {
+        currentUser.achievements.push('playlistMaster');
+    }
+
+    // Check for Night Owl achievement
+    const currentHour = new Date().getHours();
+    if (currentHour >= 0 && currentHour < 5 && !currentUser.achievements.includes('nightOwl')) {
+        currentUser.achievements.push('nightOwl');
+    }
+
+    // Save updated achievements
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+}
+
+// Call this function when page loads and after relevant actions
+document.addEventListener('DOMContentLoaded', checkAndAwardAchievements);
+
+// Track song sharing for Social Butterfly achievement
+function trackSongShare() {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser) return;
+
+    if (!currentUser.sharedSongs) {
+        currentUser.sharedSongs = 0;
+    }
+
+    currentUser.sharedSongs++;
+
+    if (currentUser.sharedSongs >= 5 && !currentUser.achievements.includes('socialButterfly')) {
+        currentUser.achievements.push('socialButterfly');
+    }
+
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+}
+
+// Track song listening
+function trackSongListen(songId) {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser) return;
+
+    if (!currentUser.listenedSongs) {
+        currentUser.listenedSongs = [];
+    }
+
+    if (!currentUser.listenedSongs.includes(songId)) {
+        currentUser.listenedSongs.push(songId);
+        
+        // Check for Music Lover achievement
+        if (currentUser.listenedSongs.length >= 10) {
+            checkAndAwardAchievements();
+        }
+    }
+
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+}
+</script>
